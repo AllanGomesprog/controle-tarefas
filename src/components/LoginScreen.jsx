@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Lock, Mail, User, ShieldCheck, ArrowRight, KeyRound, Sparkles, Sun, Moon } from 'lucide-react';
+import { Lock, Mail, User, ShieldCheck, ArrowRight, KeyRound, Sparkles } from 'lucide-react';
 import Logo from './Logo';
+import ThemeToggle from './ThemeToggle';
 
-export default function LoginScreen({ onLogin, team, theme, toggleTheme }) {
+export default function LoginScreen({ onLogin, team, theme, setTheme, toggleTheme }) {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -59,38 +60,14 @@ export default function LoginScreen({ onLogin, team, theme, toggleTheme }) {
   return (
     <div className="login-wrapper">
       <div className="login-container">
-        {/* Theme Toggle Button */}
-        {toggleTheme && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-8px' }}>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="btn btn-secondary btn-sm"
-              style={{ 
-                padding: '4px 10px', 
-                fontSize: '0.75rem', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px', 
-                borderRadius: '50px',
-                cursor: 'pointer'
-              }}
-              title={theme === 'dark' ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-            >
-              {theme === 'dark' ? (
-                <>
-                  <Sun size={13} style={{ color: '#fbbf24' }} />
-                  <span>Modo Claro</span>
-                </>
-              ) : (
-                <>
-                  <Moon size={13} style={{ color: '#6366f1' }} />
-                  <span>Modo Escuro</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        {/* Theme Toggle Segmented Switch */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+          <ThemeToggle 
+            theme={theme} 
+            setTheme={setTheme || ((t) => toggleTheme && toggleTheme())} 
+            size="sm" 
+          />
+        </div>
 
         {/* Logo and Header */}
         <div className="login-header">

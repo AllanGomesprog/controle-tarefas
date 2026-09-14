@@ -34,6 +34,7 @@ import AuditLog from './components/AuditLog';
 import CompanyManagement from './components/CompanyManagement';
 import LoginScreen from './components/LoginScreen';
 import Logo from './components/Logo';
+import ThemeToggle from './components/ThemeToggle';
 
 // Initial Team Members
 const INITIAL_TEAM = [
@@ -877,6 +878,7 @@ export default function App() {
         onLogin={handleLogin} 
         team={team} 
         theme={theme} 
+        setTheme={setTheme}
         toggleTheme={toggleTheme} 
       />
     );
@@ -943,8 +945,13 @@ export default function App() {
           </ul>
         </nav>
 
-        {/* Sidebar Footer - Current Logged User Info & Logout Button */}
+        {/* Sidebar Footer - Appearance & Current Logged User */}
         <div className="sidebar-footer">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px 12px 4px', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.76rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Aparência</span>
+            <ThemeToggle theme={theme} setTheme={setTheme} size="sm" />
+          </div>
+
           <div className="user-badge" style={{ justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
               <div style={{ backgroundColor: 'var(--primary)', width: '32px', height: '32px', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '0.85rem', flexShrink: 0 }}>
@@ -960,25 +967,14 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <button 
-                onClick={toggleTheme}
-                className="btn btn-secondary btn-sm" 
-                style={{ padding: '6px', minWidth: '30px', height: '30px' }}
-                title={theme === 'dark' ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-              >
-                {theme === 'dark' ? <Sun size={13} style={{ color: '#fbbf24' }} /> : <Moon size={13} style={{ color: '#6366f1' }} />}
-              </button>
-
-              <button 
-                onClick={handleLogout}
-                className="btn btn-secondary btn-sm" 
-                style={{ padding: '6px', minWidth: '30px', height: '30px' }}
-                title="Encerrar Sessão (Sair)"
-              >
-                <LogOut size={13} />
-              </button>
-            </div>
+            <button 
+              onClick={handleLogout}
+              className="btn btn-secondary btn-sm" 
+              style={{ padding: '6px', minWidth: '30px', height: '30px' }}
+              title="Encerrar Sessão (Sair)"
+            >
+              <LogOut size={13} />
+            </button>
           </div>
         </div>
       </aside>
@@ -992,38 +988,8 @@ export default function App() {
           </div>
 
           <div className="topbar-actions">
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                padding: '6px 12px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#ffffff',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border-color)',
-                transition: 'var(--transition-fast)',
-                boxShadow: 'var(--shadow-sm)'
-              }}
-              title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
-            >
-              {theme === 'dark' ? (
-                <>
-                  <Sun size={14} style={{ color: '#fbbf24' }} />
-                  <span>Modo Claro</span>
-                </>
-              ) : (
-                <>
-                  <Moon size={14} style={{ color: '#6366f1' }} />
-                  <span>Modo Escuro</span>
-                </>
-              )}
-            </button>
+            {/* Theme Toggle Segmented Switch */}
+            <ThemeToggle theme={theme} setTheme={setTheme} />
 
             {/* Database Status Pill */}
             <div 
