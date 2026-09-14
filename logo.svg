@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="logo-emblem-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#0f529e" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Left Emblem -->
+  <g transform="translate(10, 10)">
+    <rect width="100" height="100" rx="24" fill="url(#logo-emblem-grad)" />
+    <!-- Clipboard Frame -->
+    <rect x="25" y="25" width="50" height="56" rx="8" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 39 25 V 19 C 39 17 41 15 43 15 H 57 C 59 15 61 17 61 19 V 25" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Checkmark -->
+    <path d="M 37 54 L 46 63 L 64 43" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+
+  <!-- Wordmark 'CONTROLE' -->
+  <text x="130" y="65" font-family="'Outfit', 'Inter', 'Montserrat', sans-serif" font-size="44" font-weight="800" fill="#ffffff" letter-spacing="1">
+    CONTROLE
+  </text>
+  
+  <!-- Subtitle 'DE TAREFAS' -->
+  <text x="132" y="96" font-family="'Inter', 'Montserrat', sans-serif" font-size="18" font-weight="600" fill="#93c5fd" letter-spacing="6">
+    DE TAREFAS
+  </text>
+</svg>
