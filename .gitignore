@@ -25,3 +25,9 @@ dist-ssr
 
 .env
 .env.local
+
+# Test output and local TLS secrets
+test-results/
+playwright-report/
+*.pem
+*.key

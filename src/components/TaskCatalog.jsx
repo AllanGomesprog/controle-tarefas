@@ -8,14 +8,11 @@ import {
   Trash2, 
   Repeat, 
   User, 
-  Calendar, 
   Layers, 
-  FileText,
   PlusCircle,
-  AlertCircle
-} from 'lucide-react';
+  } from 'lucide-react';
 
-export default function TaskCatalog({ 
+export default function TaskCatalog({ canManage = false,
   taskCatalog = [], 
   team = [], 
   onAddTaskToCatalog, 
@@ -79,7 +76,7 @@ export default function TaskCatalog({
     setFormChecklist(formChecklist.filter((_, i) => i !== idx));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formTitle.trim()) {
       alert('Por favor, informe o título da tarefa/rotina.');
@@ -98,9 +95,9 @@ export default function TaskCatalog({
     };
 
     if (editingTask) {
-      onUpdateCatalogTask(editingTask.id, taskData);
+      if (!await onUpdateCatalogTask(editingTask.id, taskData)) return;
     } else {
-      onAddTaskToCatalog(taskData);
+      if (!await onAddTaskToCatalog(taskData)) return;
     }
 
     setIsModalOpen(false);
@@ -127,12 +124,12 @@ export default function TaskCatalog({
   return (
     <div>
       {/* Header Info */}
-      <div className="card-panel" style={{ marginBottom: '20px', background: 'linear-gradient(135deg, rgba(15, 82, 158, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+      <div className="card-panel" style={{ marginBottom: '20px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1.2rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckSquare size={20} style={{ color: '#a78bfa' }} />
-              Cadastro de Tarefas & Rotinas Contábeis
+            <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckSquare size={20} style={{ color: 'var(--primary-light)' }} />
+              Rotinas do escritório
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
               Cadastre e gerencie as rotinas do escritório (ex: Simples Nacional, SPED, Folha, Alvarás). O vínculo com as empresas é feito na tela <strong>"Atrelar às Empresas"</strong>.
@@ -205,7 +202,7 @@ export default function TaskCatalog({
               <CheckSquare size={40} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: '500', marginBottom: '8px' }}>
                 Nenhuma tarefa cadastrada no catálogo
               </h3>
               <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', fontSize: '0.9rem', lineHeight: '1.5', margin: '0 auto' }}>
@@ -312,7 +309,7 @@ export default function TaskCatalog({
                         onDeleteCatalogTask(task.id);
                       }
                     }}
-                    title="Excluir Tarefa do Catálogo"
+                    title="Excluir Tarefa do Catálogo (somente gestor)" disabled={!canManage}
                   >
                     <Trash2 size={12} />
                   </button>

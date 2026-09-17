@@ -5,21 +5,16 @@ import {
   Award, 
   TrendingUp, 
   Plus, 
-  Search, 
   Building2, 
   Trash2, 
   Edit, 
-  CheckCircle2, 
   Filter, 
   Users, 
   Layers, 
-  Briefcase, 
   Mail, 
   X, 
   Check,
-  AlertCircle,
-  Sparkles
-} from 'lucide-react';
+  } from 'lucide-react';
 
 export default function TeamManagement({ 
   team = [], 
@@ -29,7 +24,6 @@ export default function TeamManagement({
   onUpdateTeamMember, 
   onDeleteTeamMember, 
   onAssignCompaniesToUser, 
-  currentUser,
   userSession
 }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,11 +71,11 @@ export default function TeamManagement({
     setIsUserModalOpen(true);
   };
 
-  const handleSaveUser = (e) => {
+  const handleSaveUser = async (e) => {
     e.preventDefault();
     const finalName = formName.trim();
-    if (!finalName) {
-      alert('Por favor, informe o nome do usuário.');
+    if (!finalName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail.trim())) {
+      alert('Informe o nome e um e-mail válido para o acesso.');
       return;
     }
 
@@ -92,13 +86,13 @@ export default function TeamManagement({
     const userData = {
       name: finalName,
       role: finalRole,
-      email: formEmail.trim() || `${finalName.toLowerCase().replace(/\s+/g, '.')}@gestaocontabil.com.br`
+      email: formEmail.trim().toLowerCase()
     };
 
     if (editingUser) {
-      onUpdateTeamMember(editingUser.id, userData);
+      if (!await onUpdateTeamMember(editingUser.id, userData)) return;
     } else {
-      onAddTeamMember(userData);
+      if (!await onAddTeamMember(userData)) return;
     }
 
     setIsUserModalOpen(false);
@@ -159,9 +153,9 @@ export default function TeamManagement({
     setSelectedCompanyIds(prev => prev.filter(id => !idsToRemove.has(id)));
   };
 
-  const handleSaveCompanyAssignment = () => {
+  const handleSaveCompanyAssignment = async () => {
     if (!targetMember) return;
-    onAssignCompaniesToUser(targetMember.name, selectedCompanyIds);
+    if (!await onAssignCompaniesToUser(targetMember.name, selectedCompanyIds)) return;
     setIsAssignModalOpen(false);
   };
 
@@ -225,8 +219,8 @@ export default function TeamManagement({
                 <Users size={22} />
               </div>
               <div>
-                <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1.25rem', fontWeight: '700', margin: 0, color: 'var(--text-primary)' }}>
-                  Gestão da Equipe & Carteira de Empresas
+                <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1rem', fontWeight: '500', margin: 0, color: 'var(--text-primary)' }}>
+                  Colaboradores do escritório
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
                   Cadastre novos usuários, gerencie cargos, remova colaboradores e atrele as empresas clientes aos responsáveis.
@@ -614,14 +608,14 @@ export default function TeamManagement({
               <div className="form-group">
                 <label>E-mail Corporativo</label>
                 <input 
-                  type="email" 
+                  type="email" required
                   className="form-control" 
                   placeholder="Ex: nome@gestaocontabil.com.br" 
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                 />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Este e-mail poderá ser utilizado para login e notificações do sistema.
+                  Use o mesmo e-mail da conta de acesso. O administrador deve ativar essa conta antes do primeiro login.
                 </span>
               </div>
 

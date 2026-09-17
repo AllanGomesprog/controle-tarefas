@@ -1,3 +1,5 @@
+import { validateReceipt, downloadReceipt } from '../lib/workspaceApi.js';
+import { parseLocalDate, localDateString } from '../utils/dates.js';
 import React, { useState } from 'react';
 import { 
   Search, 
@@ -8,8 +10,6 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronUp,
-  Clock,
-  AlertTriangle,
   Trash2, 
   Edit, 
   CheckSquare, 
@@ -17,10 +17,7 @@ import {
   FileCheck, 
   Paperclip, 
   Download, 
-  Eye, 
-  CheckCircle2, 
   Building2,
-  FileText,
   UploadCloud,
   Layers,
   Repeat
@@ -44,8 +41,7 @@ export default function TaskList({
   onClearAllTasks,
   onRenewTask,
   onNavigateView,
-  onAddTaskToCatalog,
-  currentUser, 
+  canManage = false,
   prefilledDate 
 }) {
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'competence'
@@ -68,7 +64,7 @@ export default function TaskList({
   const [formCompanyId, setFormCompanyId] = useState('');
   const [formAssignee, setFormAssignee] = useState(team[0]?.name || '');
   const [formDueDate, setFormDueDate] = useState(prefilledDate || '');
-  const [formCompetencia, setFormCompetencia] = useState(getCurrentCompetencia());
+  const [formCompetencia, setFormCompetencia] = useState(prefilledDate ? getTaskCompetencia({ dueDate: prefilledDate }) : getCurrentCompetencia());
   const [formCompetenciaManual, setFormCompetenciaManual] = useState(false);
   const [formPriority, setFormPriority] = useState('Média');
   const [formDesc, setFormDesc] = useState('');
@@ -88,6 +84,7 @@ export default function TaskList({
   const [receiptDate, setReceiptDate] = useState('');
   const [receiptFileName, setReceiptFileName] = useState('');
   const [receiptFileData, setReceiptFileData] = useState('');
+  const [receiptFile, setReceiptFile] = useState(null);
   const [autoCompleteWithReceipt, setAutoCompleteWithReceipt] = useState(true);
 
   // Handle open modal for create (starts completely clean)
@@ -151,6 +148,7 @@ export default function TaskList({
       setFormClient('');
       return;
     }
+    if (!companyId) { setFormClient(''); return; }
     const found = companies.find(c => c.id === companyId);
     if (found) {
       setFormClient(found.nomeFantasia || found.razaoSocial);
@@ -174,7 +172,7 @@ export default function TaskList({
   };
 
   // Submit form (sem exigir empresa, pois o vínculo é na tela dedicada)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formTitle.trim()) {
       alert('Por favor, preencha o título da tarefa.');
@@ -183,8 +181,8 @@ export default function TaskList({
 
     const taskData = {
       title: formTitle.trim(),
-      client: editingTask ? (editingTask.client || '') : '',
-      companyId: editingTask ? (editingTask.companyId || '') : '',
+      client: formClient,
+      companyId: formCompanyId,
       assignee: formAssignee,
       dueDate: formDueDate,
       competencia: formCompetencia,
@@ -197,23 +195,10 @@ export default function TaskList({
       recurrenceDay: formIsRecurring ? formRecurrenceDay : null
     };
 
-    if (editingTask) {
-      onUpdateTask(editingTask.id, taskData);
-    } else {
-      if (onAddTaskToCatalog) {
-        onAddTaskToCatalog({
-          title: taskData.title,
-          defaultAssignee: taskData.assignee,
-          priority: taskData.priority,
-          description: taskData.description,
-          isRecurring: taskData.isRecurring,
-          recurrenceFrequency: taskData.recurrenceFrequency,
-          recurrenceDay: taskData.recurrenceDay,
-          checklist: taskData.checklist
-        });
-      }
-      alert(`A tarefa "${taskData.title}" foi cadastrada com sucesso! Para vinculá-la a uma ou mais empresas, acesse a tela "Atrelar às Empresas".`);
-    }
+    const saved = editingTask
+      ? await onUpdateTask(editingTask.id, { ...taskData, version: editingTask.version })
+      : await onAddTask({ ...taskData, status: 'Pendente' });
+    if (!saved) return;
 
     setIsModalOpen(false);
   };
@@ -267,25 +252,21 @@ export default function TaskList({
   const openReceiptModal = (task) => {
     setReceiptModalTask(task);
     setReceiptProtocol(task.receiptProtocol || '');
-    setReceiptDate(task.receiptDate || new Date().toISOString().split('T')[0]);
+    setReceiptDate(task.receiptDate || localDateString());
     setReceiptFileName(task.receiptFileName || '');
     setReceiptFileData(task.receiptFileData || '');
+    setReceiptFile(null);
     setAutoCompleteWithReceipt(task.status !== 'Concluído');
   };
 
-  const handleReceiptFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setReceiptFileName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReceiptFileData(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleReceiptFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try { validateReceipt(file); setReceiptFile(file); setReceiptFileName(file.name); }
+    catch (error) { alert(error.message); event.target.value = ''; }
   };
 
-  const handleSaveReceipt = () => {
+  const handleSaveReceipt = async () => {
     if (!receiptModalTask) return;
     if (!receiptProtocol.trim() && !receiptFileName) {
       alert('Por favor, informe ao menos o Número do Protocolo ou anexe o arquivo do recibo.');
@@ -295,9 +276,10 @@ export default function TaskList({
     const updatedTask = {
       ...receiptModalTask,
       receiptProtocol: receiptProtocol.trim(),
-      receiptDate: receiptDate || new Date().toISOString().split('T')[0],
+      receiptDate: receiptDate || localDateString(),
       receiptFileName: receiptFileName,
       receiptFileData: receiptFileData,
+      receiptFile,
       hasReceipt: true
     };
 
@@ -308,16 +290,16 @@ export default function TaskList({
       }
     }
 
-    onUpdateTask(
+    const saved = await onUpdateTask(
       receiptModalTask.id, 
       updatedTask, 
       `Anexou recibo de entrega da obrigação "${receiptModalTask.title}" sob protocolo ${receiptProtocol || 'N/A'}`
     );
 
-    setReceiptModalTask(null);
+    if (saved) setReceiptModalTask(null);
   };
 
-  const handleRemoveReceipt = () => {
+  const handleRemoveReceipt = async () => {
     if (!receiptModalTask) return;
     if (confirm('Deseja remover o recibo anexado desta tarefa?')) {
       const updatedTask = {
@@ -326,10 +308,12 @@ export default function TaskList({
         receiptDate: '',
         receiptFileName: '',
         receiptFileData: '',
+        receiptPath: '',
+        receiptFile: null,
         hasReceipt: false
       };
-      onUpdateTask(receiptModalTask.id, updatedTask, `Removeu o recibo de entrega da tarefa "${receiptModalTask.title}"`);
-      setReceiptModalTask(null);
+      const saved = await onUpdateTask(receiptModalTask.id, updatedTask, `Removeu o recibo de entrega da tarefa "${receiptModalTask.title}"`);
+      if (saved) setReceiptModalTask(null);
     }
   };
 
@@ -380,7 +364,7 @@ export default function TaskList({
   // Format date helper
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = parseLocalDate(dateStr);
     return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
@@ -523,7 +507,7 @@ export default function TaskList({
                 onClick={() => onRenewTask(task)}
                 title={`Gerar próxima competência da tarefa (Dia ${task.recurrenceDay || 10})`}
               >
-                <Repeat size={12} /> Próximo Mês
+                <Repeat size={12} /> Próximo ciclo
               </button>
             )}
 
@@ -553,7 +537,7 @@ export default function TaskList({
                   onDeleteTask(task.id);
                 }
               }}
-              title="Excluir Tarefa"
+              title="Excluir tarefa (somente gestor)" disabled={!canManage}
             >
               <Trash2 size={12} />
             </button>
@@ -917,6 +901,7 @@ export default function TaskList({
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="form-group"><label>Empresa</label><select className="form-control" value={formCompanyId} onChange={e => handleSelectCompany(e.target.value)}><option value="">Sem empresa</option>{companies.map(c => <option key={c.id} value={c.id}>{c.nomeFantasia || c.razaoSocial}</option>)}</select></div>
               <div className="form-group">
                 <label>Título da Obrigação / Rotina *</label>
                 <input 
@@ -1026,7 +1011,7 @@ export default function TaskList({
                     style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                   />
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Repeat size={16} /> Tarefa Recorrente (Repetir Automaticamente todo mês)
+                    <Repeat size={16} /> Tarefa recorrente (repetir conforme a frequência)
                   </span>
                 </label>
 
@@ -1122,7 +1107,7 @@ export default function TaskList({
                     </div>
 
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', backgroundColor: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '4px' }}>
-                      🔁 <strong>Automação Ativa:</strong> Ao concluir esta tarefa ou anexar o recibo, o sistema agenda automaticamente a competência do próximo mês para o <strong>dia {formRecurrenceDay}</strong> com checklist limpo.
+                      🔁 <strong>Automação Ativa:</strong> Ao concluir esta tarefa ou anexar o recibo, o sistema agenda automaticamente a próxima competência, conforme a frequência selecionada, para o <strong>dia {formRecurrenceDay}</strong> com checklist limpo.
                     </div>
                   </div>
                 )}
@@ -1263,7 +1248,7 @@ export default function TaskList({
                   </div>
                   <input 
                     type="file" 
-                    accept=".pdf,image/*" 
+                    accept="application/pdf,image/jpeg,image/png"
                     id="receiptFileInput"
                     style={{ display: 'none' }}
                     onChange={handleReceiptFileUpload}
@@ -1272,16 +1257,7 @@ export default function TaskList({
                     <label htmlFor="receiptFileInput" className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
                       Selecionar Arquivo
                     </label>
-                    {receiptFileData && (
-                      <a 
-                        href={receiptFileData} 
-                        download={receiptFileName || 'recibo.pdf'} 
-                        className="btn btn-secondary btn-sm"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                      >
-                        <Download size={13} /> Baixar Comprovante
-                      </a>
-                    )}
+                    {(receiptFileData || receiptModalTask.receiptPath) && <button type="button" className="btn btn-secondary btn-sm" onClick={() => downloadReceipt(receiptModalTask)}><Download size={13} /> Baixar comprovante</button>}
                   </div>
                 </div>
               </div>

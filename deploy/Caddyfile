@@ -1,0 +1,36 @@
+# Certificado público emitido para o IP definido em PUBLIC_IP.
+# Inicie o Caddy com PUBLIC_IP, CERT_FILE, KEY_FILE e WEB_ROOT no ambiente.
+{
+    auto_https disable_redirects
+}
+
+http://{$PUBLIC_IP} {
+    handle /.well-known/acme-challenge/* {
+        root * {$ACME_ROOT:/var/www/acme}
+        file_server
+    }
+    handle {
+        redir https://{$PUBLIC_IP}{uri} permanent
+    }
+}
+
+https://{$PUBLIC_IP} {
+    tls {$CERT_FILE} {$KEY_FILE}
+    root * {$WEB_ROOT}
+    encode gzip zstd
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        Strict-Transport-Security "max-age=31536000"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+    }
+    @hidden path /.env* /.git/* /src/* /node_modules/*
+    respond @hidden 404
+    @assets path /assets/*
+    header @assets Cache-Control "public, max-age=31536000, immutable"
+    @html path / /index.html
+    header @html Cache-Control "no-cache"
+    file_server
+}

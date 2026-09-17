@@ -1,139 +1,161 @@
-# 📊 Controle de Tarefas - Sistema de Gestão Fiscal e Contábil
+# Controle de Tarefas
 
-Sistema web moderno e completo para gestão operacional, controle de obrigações tributárias e rotinas contábeis de escritórios de contabilidade e BPO financeiro.
+Sistema de gestão de rotinas contábeis para organizar tarefas, competências, prazos, empresas, equipe e recibos em uma base compartilhada.
 
----
+Construído com React 19, Vite 8 e Supabase (Auth, PostgreSQL e Storage).
 
-## 🚀 Sobre o Projeto
+## Interface
 
-O **Controle de Tarefas** foi desenvolvido para atender às demandas reais de escritórios contábeis brasileiros, proporcionando controle absoluto sobre prazos fiscais, apurações tributárias, fechamentos de folha e transmissão de obrigações acessórias, eliminando riscos de multas por atraso e garantindo conformidade fiscal aos clientes.
+![Painel de controle com prioridades da equipe](docs/images/painel.png)
 
----
+*Captura da aplicação com dados fictícios usados nos testes. Esses dados não são cadastrados na instalação.*
 
-## ✨ Principais Funcionalidades
+- Menu lateral azul-escuro e painel com indicadores de tarefas pendentes, em andamento, concluídas e em atraso.
+- Prioridades em tabela, com busca por tarefa, empresa ou responsável e filtros por prazo e competência.
+- Detalhes em painel lateral: status, checklist, orientações e download do recibo.
+- Progresso do fechamento da competência e últimas movimentações da equipe.
+- Temas claro e escuro, preferência salva no navegador e layout adaptado para celular.
 
-### 📅 1. Visualização e Gestão por Competência Contábil
-* **Modos de Exibição:**
-  * **📋 Lista Geral:** Visualização tradicional corrida com filtros avançados e indicação clara da competência em cada cartão.
-  * **🗓️ Por Competência:** Agrupamento modular por mês/ano contábil (ex: `09/2026`, `08/2026`, `10/2026`).
-* **Painel de Fechamento Mensal:** Cada competência exibe contadores de tarefas (Concluídas, Em Andamento, Pendentes e Críticas) e uma **Barra de Progresso do Fechamento** (% de entregas realizadas).
-* **Filtro Rápido:** Seleção instantânea de qualquer período contábil no topo da tela.
+## Funcionalidades
 
-### 🔁 2. Tarefas Recorrentes e Automação Mensal
-* **Rotinas com Vencimento Fixo:** Definição de tarefas que se repetem automaticamente (ex: Simples Nacional todo dia 10, SPED Fiscal todo dia 15, FGTS Digital dia 07).
-* **Renovação Automática:** Ao concluir uma obrigação ou anexar seu recibo, o sistema calcula e gera automaticamente o ciclo do próximo mês.
-* **Avanço Manual:** Botão de ação rápida `🔁 Próximo Mês` para renovar obrigações adiantadas com 1 clique.
+| Área | Recursos |
+| --- | --- |
+| Tarefas e recibos | Cadastro, edição, checklist, prioridade, responsável, competência e comprovantes de entrega. |
+| Recorrências | Geração do próximo ciclo conforme a frequência, com prevenção de duplicatas. |
+| Empresas e clientes | Cadastro e associação de responsáveis e rotinas. |
+| Catálogo de rotinas | Modelos compartilhados para padronizar o trabalho do escritório. |
+| Vinculação às empresas | Criação de tarefas em lote por empresa e competência. |
+| Calendário | Vencimentos das tarefas cadastradas. |
+| Equipe | Gestão de colaboradores, cargos e carteiras de empresas. |
+| Histórico | Alterações registradas pelo servidor com data, hora e autor. |
 
-### 📎 3. Registro e Anexo de Recibos de Entrega
-* **Comprovação de Envio:** Modal específico para registrar o **Número de Protocolo Oficial**, a **Data de Transmissão** e realizar o **Upload do Recibo** (PDF ou imagem gerados pelo e-CAC, PVA do SPED ou conectividade social).
-* **Download Direto:** Download e visualização do comprovante anexado direto no cartão da tarefa.
-* **Status Visual:** Selo verde destacando tarefas com recibo transmitido e comprovado.
+## Acesso e permissões
 
-### 🏢 4. Cadastro de Empresas Desacoplado & Consulta CNPJ na Receita Federal
-* **Consulta Automática via CNPJ:** Digite o CNPJ da empresa e clique em "Consultar CNPJ" para puxar em tempo real:
-  * Razão Social e Nome Fantasia oficiais
-  * Regime Tributário (*Simples Nacional*, *Lucro Presumido*, *Lucro Real*, *MEI*)
-  * Situação Cadastral na Receita (*Ativa / Inativa*)
-* **Cadastro 100% Livre:** Cadastro de empresas desacoplado das tarefas, garantindo organização limpa da carteira de clientes.
+O login é individual, com e-mail e senha pelo **Supabase Auth**. Todos os membros autorizados compartilham os dados de um único escritório. Somente o gestor administra a equipe e realiza exclusões; as permissões também são aplicadas no banco por políticas RLS.
 
-### ⚙️ 5. Central de Vínculo de Tarefas às Empresas em Massa
-* **Atrelamento Inteligente:** Tela dedicada para selecionar uma tarefa (do catálogo ou criada na hora) e vinculá-la em lote a dezenas de empresas clientes com 1 clique.
-* **Filtros por Regime:** Filtre empresas por regime tributário e selecione todas as optantes com facilidade.
-* **Detecção de Competência:** O sistema avisa visualmente quais empresas já possuem a guia gerada para aquele mês e quais ainda estão pendentes.
+O catálogo fica no banco e novos recibos são armazenados em um bucket privado. A aplicação confirma alterações somente depois de salvar no servidor e informa falhas sem descartar os dados do formulário.
 
-### 👥 6. Gestão de Equipe & Carteira de Clientes
-* **Controle de Colaboradores:** Cadastro, edição e exclusão segura de membros da equipe com cargos (*Gestor, Coordenador, Analista, Assistente*).
-* **Gestão de Carteira:** Atribuição em massa de empresas para cada responsável, com visualização de clientes sob responsabilidade de cada analista.
+**Sem configurar o Supabase, o login fica bloqueado.** O cadastro em **Equipe** não cria uma senha: também é necessário criar a conta correspondente no Supabase Authentication, com o mesmo e-mail confirmado.
 
-### 📊 7. Painel de Controle (Dashboard Operacional)
-* **Abertura Direta de Tarefas:** Clique em qualquer obrigação da tabela de **Prazos Críticos** para abrir seu modal detalhado, atualizar status, interagir com o checklist e baixar recibos.
-* **Filtro de Competência no Dashboard:** Selecione uma competência específica para auditar os números e prazos daquele mês de apuração.
-* **Alertas de Atraso:** Alertas coloridos com contagem regressiva de dias restantes ou dias de atraso.
+## Instalação e configuração
 
-### 🌓 8. Tema Claro e Escuro (Dark / Light Mode)
-* Alternância instantânea com paleta equilibrada para alto contraste diurno ou conforto visual noturno, com persistência automática no navegador.
+Requer Node.js 22.12 ou superior na linha 22, ou Node.js 24 ou superior, e npm.
 
-### 🔐 9. Autenticação & Trilha de Auditoria
-* Tela de login com controle de sessão e logout.
-* Histórico de auditoria detalhado registrando autor, ação, data/hora e IP de cada alteração no sistema.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-* **[React 19](https://react.dev/):** Biblioteca para interfaces de usuário modernas e reativas.
-* **[Vite](https://vite.dev/):** Build tool de alta velocidade e servidor de desenvolvimento.
-* **[Lucide React](https://lucide.dev/):** Ícones modernos e consistentes.
-* **[Supabase](https://supabase.com/):** Integração para persistência em nuvem (com suporte híbrido para armazenamento local offline).
-* **CSS Moderno / Design System:** Variáveis HSL, efeitos de vidro fosco (*glassmorphism*), responsividade e temas claro/escuro.
-
----
-
-## 📦 Como Instalar e Rodar o Projeto Localmente
-
-### Pré-requisitos
-* **Node.js** (versão 18 ou superior)
-* **npm** ou **yarn**
-
-### 1. Clonar o Repositório
-```bash
+```sh
 git clone https://github.com/AllanGomesprog/controle-tarefas.git
 cd controle-tarefas
+npm ci
 ```
 
-### 2. Instalar as Dependências
-```bash
-npm install
+1. Crie um projeto Supabase exclusivo para o escritório.
+2. Execute o arquivo [supabase_schema.sql](supabase_schema.sql) inteiro no SQL Editor. Para atualizar uma instalação existente, leia as orientações de migração no guia antes de executar.
+3. Crie a conta do primeiro gestor no Supabase Authentication e autorize seu e-mail em `team_members`, conforme o [guia de ativação](ACESSO_E_IMPLANTACAO.md#1-banco-e-primeiro-gestor).
+4. Copie `.env.example` para `.env` e preencha:
+
+```dotenv
+VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=SUA_CHAVE_PUBLICA
 ```
 
-### 3. Executar o Servidor de Desenvolvimento
-```bash
+Use a chave pública do projeto. Nunca coloque uma chave `service_role` no frontend. O `.env` não deve ser enviado ao repositório.
+
+5. Inicie o ambiente de desenvolvimento:
+
+```sh
 npm run dev
 ```
-O sistema estará acessível em:  
-👉 **http://localhost:5173/**
 
-### 4. Gerar Build de Produção
-```bash
+As variáveis de ambiente são incorporadas durante o build. Ao alterá-las, reinicie o desenvolvimento ou gere um novo build de produção.
+
+## Build e acesso por IP
+
+```sh
 npm run build
+npm start
 ```
 
----
+O servidor local serve a pasta `dist` em `http://127.0.0.1:8080`.
 
-## 📁 Estrutura de Pastas
+Para testar com outros computadores na mesma rede:
 
-```
-controle-tarefas/
-├── public/                 # Imagens públicas, ícones e logo
-├── src/
-│   ├── assets/             # Recursos visuais e componentes de estilo
-│   ├── components/
-│   │   ├── AuditLog.jsx            # Histórico e trilha de auditoria
-│   │   ├── AutomationTemplates.jsx # Vínculo de tarefas às empresas em massa
-│   │   ├── CalendarView.jsx        # Calendário mensal de tributos
-│   │   ├── CompanyManagement.jsx   # Gestão de empresas e consulta CNPJ
-│   │   ├── Dashboard.jsx           # Dashboard com prazos críticos e KPIs
-│   │   ├── LoginScreen.jsx         # Tela de autenticação e sessão
-│   │   ├── Logo.jsx                # Componente de logo do sistema
-│   │   ├── TaskCatalog.jsx         # Cadastro e catálogo de rotinas
-│   │   ├── TaskList.jsx            # Minhas Tarefas (Lista Geral e por Competência)
-│   │   └── TeamManagement.jsx      # Gestão da equipe e carteira de empresas
-│   ├── lib/
-│   │   └── supabaseClient.js       # Conexão e configuração do Supabase
-│   ├── utils/
-│   │   ├── competence.js           # Utilitários contábeis de competência (MM/AAAA)
-│   │   └── recurrence.js           # Cálculo de recorrência e datas fixas
-│   ├── App.jsx                     # Componente raiz e orquestrador de estado
-│   ├── index.css                   # Design System e variáveis de tema
-│   └── main.jsx                    # Ponto de entrada da aplicação
-├── .gitignore              # Arquivos ignorados pelo Git
-├── index.html              # HTML base da aplicação
-├── package.json            # Scripts e dependências do projeto
-└── vite.config.js          # Configuração do Vite
+```sh
+npm run start:lan
 ```
 
----
+O terminal mostra os IPs disponíveis. Use o endereço da rede privada, por exemplo `http://192.168.1.50:8080`, e configure o firewall para permitir a porta na rede privada.
 
-## 📄 Licença
+**Acesso de fora do escritório:** exige hospedagem ou servidor acessível, configuração de rede e HTTPS. O IP privado da rede local não é acessível diretamente pela internet. O projeto inclui um servidor Node com suporte a TLS e configurações do Caddy em `deploy/`.
+
+Siga [ACESSO_E_IMPLANTACAO.md](ACESSO_E_IMPLANTACAO.md) para configurar o acesso externo por IP, certificados, contas, migração e backups. Enviar o código ao GitHub não publica o sistema nem configura automaticamente o Supabase ou a rede. Não use o servidor de desenvolvimento Vite para publicação externa.
+
+## Comandos
+
+| Comando | Finalidade |
+| --- | --- |
+| `npm run dev` | Desenvolvimento local com Vite. |
+| `npm run dev:lan` | Desenvolvimento acessível pela rede local. |
+| `npm run build` | Gera o build em `dist`. |
+| `npm start` | Serve o build no endereço local, porta 8080. |
+| `npm run start:lan` | Serve o build pelas interfaces de rede disponíveis. |
+| `npm run lint` | Executa a análise estática. |
+| `npm test` | Testa domínio, API, servidor e banco em memória. |
+| `npm run test:e2e` | Executa os testes de navegador com Playwright. |
+
+## Validação
+
+```sh
+npm run lint
+npm test
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+Para usar o Chrome já instalado no Windows, execute no PowerShell:
+
+```powershell
+$env:PLAYWRIGHT_CHANNEL = 'chrome'
+npm run test:e2e
+```
+
+Os testes cobrem datas e recorrências, tratamento de erros, proteção do servidor, RLS, auditoria, concorrência, autenticação, permissões, filtros, checklist e navegação responsiva, inclusive em largura de 320 px.
+
+Os testes SQL usam PostgreSQL em memória (PGlite), com autenticação e storage simulados. Os testes de navegador usam uma API simulada e não acessam um projeto Supabase real. Após configurar a hospedagem, valide também o login e a gravação com contas reais em dispositivos diferentes e o acesso de fora da rede.
+
+## Regras e limites
+
+- Datas de vencimento preservam o dia no fuso brasileiro.
+- Recorrências respeitam frequência e competência, inclusive quando o vencimento ocorre em outro mês.
+- Conclusão e geração do próximo ciclo são gravadas juntas em transação. Conflitos de versão recusam alterações desatualizadas.
+- A geração em lote evita duplicatas por empresa, rotina e competência. Dias são ajustados ao último dia válido do mês.
+- Não há edição offline com sincronização posterior.
+- O calendário mostra tarefas cadastradas. Os modelos de obrigações são sugestões; o escritório deve confirmar os prazos.
+- Recibos aceitam PDF, JPG e PNG de até 10 MB. Anexos legados em base64 continuam legíveis.
+- O histórico mostra os últimos 200 registros; o histórico completo permanece no banco. A aplicação não permite apagar a auditoria.
+- A sessão fica na aba do navegador. Recuperação de acesso é administrada pelo responsável no Supabase.
+- Dados antigos em `localStorage` não são apagados nem importados automaticamente. Consulte o guia antes de migrar dados reais.
+
+## Estrutura
+
+```text
+src/
+  App.jsx                  Navegação e composição das telas
+  components/              Telas, formulários e painel lateral de tarefas
+  hooks/useWorkspace.js    Sessão, atualização da base e operações
+  lib/workspaceApi.js      Mapeamento, persistência e recibos
+  utils/                   Datas, competências e recorrências
+  index.css                Tokens visuais e estilos compartilhados
+  workspace.css            Layout responsivo e componentes do novo design
+scripts/serve.mjs          Servidor estático HTTP/HTTPS
+deploy/                   Configurações do Caddy
+tests/                    Testes de domínio, SQL, servidor e navegador
+docs/images/              Capturas da interface para documentação
+supabase_schema.sql       Esquema, migração, RLS, transações e storage
+```
+
+- [Guia de acesso e implantação](ACESSO_E_IMPLANTACAO.md)
+- [Análise técnica da versão original](ANALISE_TECNICA.md) — diagnóstico histórico anterior às correções.
+
+## Licença
 
 Este projeto é de uso restrito e confidencial. Todos os direitos reservados.

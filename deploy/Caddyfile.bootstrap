@@ -1,0 +1,10 @@
+# Usado apenas antes da primeira emissão do certificado; não publica a aplicação.
+http://{$PUBLIC_IP} {
+    handle /.well-known/acme-challenge/* {
+        root * {$ACME_ROOT:/var/www/acme}
+        file_server
+    }
+    handle {
+        respond "Ativação em andamento" 503
+    }
+}

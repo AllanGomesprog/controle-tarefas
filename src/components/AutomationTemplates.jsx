@@ -1,3 +1,6 @@
+import { getCurrentCompetencia, formatCompetenciaLabel, getCompetenciaOptions } from '../utils/competence.js';
+import { dateInMonth, newId } from '../utils/dates.js';
+import { uniqueNewTasks } from '../utils/tasks.js';
 import React, { useState } from 'react';
 import { 
   Play, 
@@ -5,17 +8,10 @@ import {
   Sparkles, 
   User, 
   CalendarDays, 
-  Building2, 
   Layers, 
   CheckCircle2, 
-  AlertCircle, 
-  ArrowRight,
-  Filter,
-  FileText,
-  PlusCircle,
   Plus,
-  Trash2
-} from 'lucide-react';
+  } from 'lucide-react';
 
 export default function AutomationTemplates({ 
   team, 
@@ -27,7 +23,7 @@ export default function AutomationTemplates({
   onNavigateToCatalog 
 }) {
   const [activeTab, setActiveTab] = useState('recurrence'); // 'recurrence' or 'templates'
-  const [selectedMonth, setSelectedMonth] = useState('Setembro / 2026');
+  const [selectedMonth, setSelectedMonth] = useState(formatCompetenciaLabel(getCurrentCompetencia()));
   const [selectedObligation, setSelectedObligation] = useState('simples');
   
   // Task source: 'catalog' (if user has tasks in catalog), 'custom', or 'template'
@@ -42,7 +38,7 @@ export default function AutomationTemplates({
   const isCustomTask = taskSource === 'custom';
   const [customTitle, setCustomTitle] = useState('');
   const [customDueDay, setCustomDueDay] = useState(10);
-  const [customPriority, setCustomPriority] = useState('Média');
+  const customPriority = 'Média';
   const [customChecklist, setCustomChecklist] = useState([]);
   const [newChecklistStep, setNewChecklistStep] = useState('');
 
@@ -213,7 +209,7 @@ export default function AutomationTemplates({
   };
 
   // Run Generation
-  const handleGenerateTasks = () => {
+  const handleGenerateTasks = async () => {
     const companiesToLink = targetCompanies.filter(c => 
       selectedCompanyIds.length === 0 || selectedCompanyIds.includes(c.id)
     );
@@ -236,12 +232,12 @@ export default function AutomationTemplates({
       'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'
     };
     const monthNum = monthMap[monthName] || '09';
-    const dueDayStr = String(taskDueDay).padStart(2, '0');
-    const formattedDate = `${year}-${monthNum}-${dueDayStr}`;
+
+    const formattedDate = dateInMonth(year, monthNum, taskDueDay);
     const compCode = `${monthNum}/${year}`;
 
     const newTasks = companiesToLink.map(c => ({
-      id: `tsk-rec-${Date.now()}-${c.id}`,
+      id: newId(),
       title: `${taskTitle} - ${selectedMonth}`,
       client: c.nomeFantasia || c.razaoSocial,
       companyId: c.id,
@@ -253,20 +249,22 @@ export default function AutomationTemplates({
       description: `Obrigação/tarefa vinculada à empresa ${c.razaoSocial} (CNPJ: ${c.cnpj}) para a competência de ${selectedMonth}.`,
       status: 'Pendente',
       checklist: taskChecklist.map(step => ({ text: step.text, done: false })),
-      type: isCustomTask ? 'custom' : (currentTemplate.type || 'custom'),
-      isRecurring: true,
-      recurrenceFrequency: 'Mensal',
+      type: taskSource === 'template' ? currentTemplate.type : 'custom',
+      isRecurring: taskSource === 'catalog' ? Boolean(selectedCatalogTask?.isRecurring) : true,
+      recurrenceFrequency: taskSource === 'catalog' ? selectedCatalogTask?.recurrenceFrequency || 'Mensal' : 'Mensal',
       recurrenceDay: taskDueDay
     }));
 
-    onTriggerAutomation(newTasks, selectedMonth);
-    alert(`Sucesso! A tarefa "${taskTitle}" foi atrelada e gerada para ${newTasks.length} empresa(s) para a competência de ${selectedMonth}.`);
+    const pending = uniqueNewTasks(newTasks, tasks);
+    if (!pending.length) { alert('As tarefas desta competência já foram criadas.'); return; }
+    const saved = await onTriggerAutomation(pending, selectedMonth);
+    if (saved) alert('Geração concluída. As tarefas existentes foram preservadas.');
   };
 
   return (
-    <div>
+    <div className="automation-view">
       {/* Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
         <button 
           className={`btn ${activeTab === 'recurrence' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('recurrence')}
@@ -287,8 +285,8 @@ export default function AutomationTemplates({
           <div 
             className="card-panel" 
             style={{ 
-              background: 'linear-gradient(135deg, rgba(15, 82, 158, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%)', 
-              border: '1px solid rgba(15, 82, 158, 0.4)',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
@@ -301,8 +299,8 @@ export default function AutomationTemplates({
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1.2rem', fontWeight: '700' }}>
-                    Central de Atrelamento & Recorrência de Tarefas
+                  <h3 style={{ fontFamily: 'var(--font-title)', fontSize: '1rem', fontWeight: '500' }}>
+                    Vincular rotinas às empresas
                   </h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Crie a tarefa que desejar (ou use um modelo pronto) e atrele às empresas que precisar com 1 clique.
@@ -336,10 +334,10 @@ export default function AutomationTemplates({
             </div>
 
             {/* Task Definition Section */}
-            <div style={{ backgroundColor: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
               {taskSource === 'catalog' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '14px' }}>
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontWeight: '600' }}>1. Selecione a Tarefa Cadastrada:</label>
                       <select 
@@ -364,12 +362,7 @@ export default function AutomationTemplates({
                         onChange={(e) => setSelectedMonth(e.target.value)}
                         style={{ width: '100%', fontSize: '0.9rem', padding: '9px 12px' }}
                       >
-                        <option value="Julho / 2026">Julho / 2026</option>
-                        <option value="Agosto / 2026">Agosto / 2026</option>
-                        <option value="Setembro / 2026">Setembro / 2026</option>
-                        <option value="Outubro / 2026">Outubro / 2026</option>
-                        <option value="Novembro / 2026">Novembro / 2026</option>
-                        <option value="Dezembro / 2026">Dezembro / 2026</option>
+{getCompetenciaOptions(tasks).map(option => <option key={option.value} value={formatCompetenciaLabel(option.value)}>{option.label}</option>)}
                       </select>
                     </div>
 
@@ -411,7 +404,7 @@ export default function AutomationTemplates({
                   )}
                 </div>
               ) : taskSource === 'template' ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '14px' }}>
                   <div className="form-group" style={{ margin: 0 }}>
                     <label style={{ fontWeight: '600' }}>1. Escolha o Modelo da Tarefa:</label>
                     <select 
@@ -446,12 +439,7 @@ export default function AutomationTemplates({
                       onChange={(e) => setSelectedMonth(e.target.value)}
                       style={{ width: '100%', fontSize: '0.9rem', padding: '9px 12px' }}
                     >
-                      <option value="Julho / 2026">Julho / 2026</option>
-                      <option value="Agosto / 2026">Agosto / 2026</option>
-                      <option value="Setembro / 2026">Setembro / 2026</option>
-                      <option value="Outubro / 2026">Outubro / 2026</option>
-                      <option value="Novembro / 2026">Novembro / 2026</option>
-                      <option value="Dezembro / 2026">Dezembro / 2026</option>
+{getCompetenciaOptions(tasks).map(option => <option key={option.value} value={formatCompetenciaLabel(option.value)}>{option.label}</option>)}
                     </select>
                   </div>
 
@@ -477,7 +465,7 @@ export default function AutomationTemplates({
               ) : (
                 /* Custom Free Task Creator */
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.2fr', gap: '12px' }}>
+                  <div className="automation-task-fields">
                     <div className="form-group" style={{ margin: 0 }}>
                       <label style={{ fontWeight: '600' }}>Título da Tarefa que Deseja Criar *</label>
                       <input 
@@ -509,10 +497,7 @@ export default function AutomationTemplates({
                         value={selectedMonth}
                         onChange={(e) => setSelectedMonth(e.target.value)}
                       >
-                        <option value="Julho / 2026">Julho / 2026</option>
-                        <option value="Agosto / 2026">Agosto / 2026</option>
-                        <option value="Setembro / 2026">Setembro / 2026</option>
-                        <option value="Outubro / 2026">Outubro / 2026</option>
+{getCompetenciaOptions(tasks).map(option => <option key={option.value} value={formatCompetenciaLabel(option.value)}>{option.label}</option>)}
                       </select>
                     </div>
 

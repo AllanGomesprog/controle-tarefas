@@ -1,3 +1,4 @@
+import { localDateString, frequencyMonths, newId } from './dates.js';
 // Helper functions for recurring accounting tasks
 
 const MONTH_NAMES = [
@@ -13,12 +14,7 @@ const MONTH_NAMES = [
  * @returns {string} - "YYYY-MM-DD"
  */
 export function calculateNextRecurrenceDate(currentDueDateStr, recurrenceDay = null, frequency = 'Mensal') {
-  if (!currentDueDateStr) {
-    const today = new Date();
-    const targetDay = recurrenceDay || today.getDate();
-    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, targetDay);
-    return nextMonth.toISOString().split('T')[0];
-  }
+  if (!currentDueDateStr) currentDueDateStr = localDateString();
 
   const [yearStr, monthStr, dayStr] = currentDueDateStr.split('-');
   let year = parseInt(yearStr, 10);
@@ -84,7 +80,7 @@ export function formatNextRecurrenceTitle(title, nextDueDateStr) {
   return title;
 }
 
-import { getNextCompetencia, getTaskCompetencia, formatCompetenciaLabel } from './competence';
+import { getNextCompetencia, getTaskCompetencia, formatCompetenciaLabel } from './competence.js';
 
 /**
  * Creates the next iteration of a recurring task with clean checklist and pending status.
@@ -94,15 +90,17 @@ import { getNextCompetencia, getTaskCompetencia, formatCompetenciaLabel } from '
 export function createNextCycleTask(task) {
   const nextDueDate = calculateNextRecurrenceDate(
     task.dueDate, 
-    task.recurrenceDay || 10, 
+    task.recurrenceDay || null,
     task.recurrenceFrequency || 'Mensal'
   );
 
-  const nextTitle = formatNextRecurrenceTitle(task.title, nextDueDate);
+
 
   const currentComp = getTaskCompetencia(task);
-  const nextComp = getNextCompetencia(currentComp);
+  const nextComp = getNextCompetencia(currentComp, frequencyMonths(task.recurrenceFrequency));
   const nextCompLabel = formatCompetenciaLabel(nextComp);
+  const [month, year] = nextComp.split('/');
+  const nextTitle = formatNextRecurrenceTitle(task.title, year + '-' + month + '-01');
 
   const cleanChecklist = Array.isArray(task.checklist)
     ? task.checklist.map(item => ({ text: item.text, done: false }))
@@ -110,7 +108,8 @@ export function createNextCycleTask(task) {
 
   return {
     ...task,
-    id: `tsk-rec-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    id: newId(),
+    version: 0,
     title: nextTitle,
     dueDate: nextDueDate,
     competencia: nextComp,
@@ -121,6 +120,8 @@ export function createNextCycleTask(task) {
     receiptDate: '',
     receiptFileName: '',
     receiptFileData: '',
+    receiptPath: '',
+    receiptFile: null,
     hasReceipt: false,
     createdAt: new Date().toISOString()
   };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Search, Trash2, Calendar, HardDrive, Info } from 'lucide-react';
+import { ShieldCheck, Search, Calendar, HardDrive, } from 'lucide-react';
 
-export default function AuditLog({ logs, onClearLogs }) {
+export default function AuditLog({ logs }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filter logs based on search term
@@ -44,10 +44,10 @@ export default function AuditLog({ logs, onClearLogs }) {
         </div>
         <div>
           <h4 style={{ fontFamily: 'var(--font-title)', fontSize: '1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
-            Protocolo de Segurança e Rastreabilidade Jurídica (LGPD)
+            Histórico de alterações
           </h4>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
-            Todas as ações e alterações realizadas no sistema são registradas de forma imutável com data, hora, usuário responsável e metadados de rede. Este log serve como segurança jurídica e auditoria interna em caso de questionamento de prazos de obrigações tributárias.
+            As alterações de dados são registradas pelo servidor com data, hora e autor. Os últimos 200 registros aparecem nesta tela; o histórico completo permanece no banco.
           </p>
         </div>
       </div>
@@ -60,15 +60,13 @@ export default function AuditLog({ logs, onClearLogs }) {
             type="text" 
             placeholder="Buscar por usuário, ação ou detalhe..." 
             className="form-control search-input" 
-            style={{ paddingLeft: '36px', minWidth: '300px' }}
+            style={{ paddingLeft: '36px', width: '300px' }}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <button className="btn btn-danger btn-sm" onClick={onClearLogs}>
-          <Trash2 size={12} /> Limpar Logs
-        </button>
+
       </div>
 
       {/* Logs Table */}
@@ -121,10 +119,10 @@ export default function AuditLog({ logs, onClearLogs }) {
                     </td>
                     <td className="log-meta">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <HardDrive size={10} /> {log.ip || '192.168.1.45'}
+                        <HardDrive size={10} /> {log.ip || 'Não coletado'}
                       </div>
                       <div style={{ fontSize: '0.65rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }} title={log.userAgent}>
-                        {log.userAgent || 'Chrome/Windows10'}
+                        {log.userAgent || 'Registro do servidor'}
                       </div>
                     </td>
                   </tr>

@@ -1,3 +1,4 @@
+import { parseLocalDate } from './dates.js';
 // Utilitários de Competência Contábil
 
 export const MONTH_NAMES = [
@@ -109,17 +110,15 @@ export function getCurrentCompetencia() {
  * @param {string} comp - 'MM/AAAA'
  * @returns {string}
  */
-export function getNextCompetencia(comp) {
+export function getNextCompetencia(comp, months = 1) {
   const norm = normalizeCompetencia(comp) || getCurrentCompetencia();
   const [mStr, yStr] = norm.split('/');
   let m = parseInt(mStr, 10);
   let y = parseInt(yStr, 10);
 
-  m += 1;
-  if (m > 12) {
-    m = 1;
-    y += 1;
-  }
+  const index = m - 1 + months;
+  y += Math.floor(index / 12);
+  m = index % 12 + 1;
 
   return `${String(m).padStart(2, '0')}/${y}`;
 }
@@ -199,7 +198,7 @@ export function groupTasksByCompetencia(tasks = []) {
     today.setHours(0, 0, 0, 0);
     const critical = compTasks.filter(t => {
       if (t.status === 'Concluído') return false;
-      const due = new Date(t.dueDate);
+      const due = parseLocalDate(t.dueDate);
       due.setHours(0, 0, 0, 0);
       const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
       return diff <= 5;

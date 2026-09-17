@@ -8,24 +8,18 @@ import {
   Trash2, 
   CheckCircle2, 
   AlertCircle, 
-  FileText, 
   User, 
   Hash, 
-  Tag,
-  ExternalLink,
-  ShieldAlert,
   Sparkles,
   Loader2,
-  RefreshCw
-} from 'lucide-react';
+  } from 'lucide-react';
 
-export default function CompanyManagement({ 
+export default function CompanyManagement({ canManage = false,
   companies, 
   team, 
   onAddCompany, 
   onUpdateCompany, 
   onDeleteCompany, 
-  currentUser 
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [regimeFilter, setRegimeFilter] = useState('Todos');
@@ -131,7 +125,7 @@ export default function CompanyManagement({
       } else if (data.opcao_pelo_simples) {
         regimeIdentificado = 'Simples Nacional';
       } else {
-        regimeIdentificado = 'Lucro Presumido';
+        regimeIdentificado = formRegime; // A consulta não determina o regime fora do Simples/MEI.
       }
 
       setFormRegime(regimeIdentificado);
@@ -158,9 +152,9 @@ export default function CompanyManagement({
 
       setReceitaMessage({
         type: 'success',
-        text: `Dados de "${data.razao_social}" importados com sucesso! Regime: ${regimeIdentificado} (Situação: ${data.descricao_situacao_cadastral || 'Ativa'}).`
+        text: `Dados de "${data.razao_social}" importados com sucesso! ${!data.opcao_pelo_mei && !data.opcao_pelo_simples ? 'Confirme o regime tributário manualmente.' : 'Regime: ' + regimeIdentificado} (Situação: ${data.descricao_situacao_cadastral || 'Ativa'}).`
       });
-    } catch (err) {
+    } catch {
       setReceitaMessage({
         type: 'error',
         text: 'Não foi possível consultar a Receita Federal para este CNPJ. Verifique a numeração ou preencha os dados manualmente.'
@@ -170,7 +164,7 @@ export default function CompanyManagement({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formRazao.trim() || !formCnpj.trim()) {
       alert('Por favor preencha a Razão Social e o CNPJ da empresa.');
@@ -189,9 +183,9 @@ export default function CompanyManagement({
     };
 
     if (editingCompany) {
-      onUpdateCompany(editingCompany.id, companyData);
+      if (!await onUpdateCompany(editingCompany.id, companyData)) return;
     } else {
-      onAddCompany(companyData);
+      if (!await onAddCompany(companyData)) return;
     }
 
     setIsModalOpen(false);
@@ -231,7 +225,7 @@ export default function CompanyManagement({
               type="text" 
               placeholder="Buscar por Razão Social, Fantasia ou CNPJ..." 
               className="form-control search-input" 
-              style={{ paddingLeft: '36px', minWidth: '320px' }}
+              style={{ paddingLeft: '36px', width: '320px' }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -404,7 +398,7 @@ export default function CompanyManagement({
                         onDeleteCompany(company.id);
                       }
                     }}
-                    title="Excluir Empresa"
+                    title="Excluir Empresa (somente gestor)" disabled={!canManage}
                   >
                     <Trash2 size={13} />
                   </button>

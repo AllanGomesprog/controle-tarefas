@@ -1,179 +1,63 @@
-/* 
-  Controle de Tarefas - Design System Central (index.css)
-  Estilização premium, moderna e responsiva.
-*/
-
+/* Shared visual tokens. Component layouts follow below. */
 :root {
-  --font-title: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-
-  /* Cores HSL - Palette Escura Sofisticada */
-  --bg-main: #090d16;
-  --bg-sidebar: #0f1524;
-  --bg-card: #172033;
-  --bg-card-hover: #1e2942;
-  --border-color: #263554;
-  --border-color-focus: #4f46e5;
-  
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  
-  /* Cores de Destaque - Royal Blue */
-  --primary: #0f529e;
-  --primary-hover: #1664be;
-  --primary-light: #2d82e8;
-  --accent-cyan: #06b6d4;
-  --accent-purple: #8b5cf6;
-
-  /* Estados de Tarefa */
-  --color-pending: #f59e0b; /* Amarelo */
-  --color-pending-bg: rgba(245, 158, 11, 0.1);
-  --color-inprogress: #3b82f6; /* Azul */
-  --color-inprogress-bg: rgba(59, 130, 246, 0.1);
-  --color-completed: #10b981; /* Verde */
-  --color-completed-bg: rgba(16, 185, 129, 0.1);
-  --color-critical: #ef4444; /* Vermelho */
-  
-  /* Efeitos */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
-  --radius-sm: 6px;
+  color-scheme: light;
+  --font-title: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --bg-main: #f5f7fa;
+  --bg-sidebar: #132238;
+  --bg-card: #fff;
+  --bg-card-hover: #f5f7fa;
+  --border-color: #e6ebf1;
+  --border-color-focus: #285fce;
+  --text-primary: #172638;
+  --text-secondary: #617185;
+  --text-muted: #617185;
+  --primary: #285fce;
+  --primary-hover: #214eac;
+  --primary-light: #285fce;
+  --accent-cyan: #285fce;
+  --accent-purple: #7756b1;
+  --soft: #eef3f9;
+  --color-pending: #956022;
+  --color-pending-bg: #fff5e4;
+  --color-inprogress: #285fce;
+  --color-inprogress-bg: #edf3ff;
+  --color-completed: #187b62;
+  --color-completed-bg: #eaf7f1;
+  --color-critical: #b7464b;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: 0 12px 40px #13223820;
+  --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 16px;
-  
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-lg: 12px;
+  --transition-fast: .15s ease;
+  --transition-normal: .2s ease;
 }
-
-/* ==============================================================================
-   Tema Claro (data-theme="light") - Design System
-   ============================================================================== */
-[data-theme="light"] {
-  /* Palette Clara Limpa, Elegante e de Alto Contraste */
-  --bg-main: #f1f5f9;
-  --bg-sidebar: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --border-color: #cbd5e1;
-  --border-color-focus: #0f529e;
-  
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  
-  /* Cores de Destaque - Royal Blue */
-  --primary: #0f529e;
-  --primary-hover: #0b3d75;
-  --primary-light: #1664be;
-  --accent-cyan: #0284c7;
-  --accent-purple: #7c3aed;
-
-  /* Estados de Tarefa */
-  --color-pending: #d97706;
-  --color-pending-bg: rgba(217, 119, 6, 0.14);
-  --color-inprogress: #2563eb;
-  --color-inprogress-bg: rgba(37, 99, 235, 0.12);
-  --color-completed: #059669;
-  --color-completed-bg: rgba(5, 150, 105, 0.14);
-  --color-critical: #dc2626;
-
-  /* Efeitos */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Ajustes Específicos para Tema Claro */
-[data-theme="light"] body {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-}
-
-[data-theme="light"] .topbar {
-  background-color: rgba(255, 255, 255, 0.88);
-  border-bottom: 1px solid var(--border-color);
-}
-
-[data-theme="light"] .content-body {
-  background-image: radial-gradient(circle at top right, rgba(15, 82, 158, 0.05), transparent 450px);
-}
-
-[data-theme="light"] .form-control {
-  background-color: #ffffff;
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-[data-theme="light"] .form-control:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(15, 82, 158, 0.15);
-}
-
-[data-theme="light"] .modal-overlay {
-  background-color: rgba(15, 23, 42, 0.65);
-}
-
-[data-theme="light"] .modal-content {
-  background-color: #ffffff;
-  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.15);
-  border-color: var(--border-color);
-}
-
-[data-theme="light"] .data-table tr:hover td {
-  background-color: #f8fafc;
-}
-
-[data-theme="light"] .btn-secondary {
-  background-color: #ffffff;
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-}
-
-[data-theme="light"] .btn-secondary:hover {
-  background-color: #f1f5f9;
-  border-color: #94a3b8;
-}
-
-[data-theme="light"] .user-badge {
-  background-color: #f8fafc;
-}
-
-[data-theme="light"] .task-assignee {
-  background-color: #f1f5f9;
-}
-
-[data-theme="light"] .routine-steps-list,
-[data-theme="light"] .task-checklist-section {
-  background-color: #f8fafc;
-  border-color: var(--border-color);
-}
-
-[data-theme="light"] input[type="checkbox"] {
-  background-color: #ffffff;
-}
-
-[data-theme="light"] .login-wrapper {
-  background-color: #f1f5f9;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(15, 82, 158, 0.12) 0%, transparent 400px),
-    radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 400px);
-}
-
-[data-theme="light"] .login-container {
-  background-color: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .quick-user-btn {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
-}
-
-[data-theme="light"] .quick-user-btn:hover {
-  background-color: #f1f5f9;
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-main: #111821;
+  --bg-sidebar: #101b2b;
+  --bg-card: #192330;
+  --bg-card-hover: #233144;
+  --border-color: #2b3848;
+  --border-color-focus: #8cb2ff;
+  --text-primary: #e8eef5;
+  --text-secondary: #a4b3c4;
+  --text-muted: #a4b3c4;
+  --primary: #356bcc;
+  --primary-hover: #2e5fb8;
+  --primary-light: #8cb2ff;
+  --accent-cyan: #8cb2ff;
+  --accent-purple: #c6a9f0;
+  --soft: #233144;
+  --color-pending: #edc27c;
+  --color-pending-bg: #3e3220;
+  --color-inprogress: #8cb2ff;
+  --color-inprogress-bg: #203653;
+  --color-completed: #7dddc0;
+  --color-completed-bg: #183b33;
+  --color-critical: #ffa5a9;
 }
 
 /* Reset básico */

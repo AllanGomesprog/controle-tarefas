@@ -1,3 +1,4 @@
+import { parseLocalDate, } from '../utils/dates.js';
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Info, Plus } from 'lucide-react';
 
@@ -12,26 +13,6 @@ export default function CalendarView({ tasks, onAddTask }) {
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
-
-  // standard monthly taxes to populate automatically
-  const getStandardTaxesForDay = (day) => {
-    const taxes = [];
-    if (day === 7) {
-      taxes.push({ id: `tax-fgts-${day}`, title: 'Guia FGTS Mensal', type: 'fgts', client: 'Todos os clientes com funcionários' });
-      taxes.push({ id: `tax-esocial-${day}`, title: 'Fechamento e-Social', type: 'esocial', client: 'Todos os clientes com funcionários' });
-    }
-    if (day === 10) {
-      taxes.push({ id: `tax-fat-${day}`, title: 'Declaração de Faturamento', type: 'custom', client: 'Clientes com obrigações de faturamento' });
-    }
-    if (day === 15) {
-      taxes.push({ id: `tax-dctf-${day}`, title: 'DCTF Web & EFD-Reinf', type: 'esocial', client: 'Empresas do Lucro Presumido/Real' });
-    }
-    if (day === 20) {
-      taxes.push({ id: `tax-das-${day}`, title: 'DAS Simples Nacional', type: 'das', client: 'Clientes do Simples Nacional' });
-      taxes.push({ id: `tax-darf-${day}`, title: 'DARF Previdenciário (INSS)', type: 'das', client: 'Todos os clientes ativos' });
-    }
-    return taxes;
-  };
 
   // Helper to change month
   const prevMonth = () => {
@@ -85,19 +66,14 @@ export default function CalendarView({ tasks, onAddTask }) {
     
     // User added tasks matching this date
     const dayTasks = tasks.filter(t => {
-      const taskDate = new Date(t.dueDate);
+      const taskDate = parseLocalDate(t.dueDate);
       return taskDate.toDateString() === dStr;
     }).map(t => ({
       ...t,
       isCustomTask: true
     }));
 
-    // Auto generated standard tax calendar items
-    const stdTaxes = date.getMonth() === month && date.getFullYear() === year 
-      ? getStandardTaxesForDay(date.getDate()) 
-      : [];
-
-    return [...stdTaxes, ...dayTasks];
+    return dayTasks;
   };
 
   const handleDayClick = (dayData) => {
@@ -153,7 +129,7 @@ export default function CalendarView({ tasks, onAddTask }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           <Info size={14} />
-          <span>Guias recorrentes (DAS, FGTS, e-Social) são exibidas automaticamente.</span>
+          <span>São exibidos os vencimentos das tarefas cadastradas pelo escritório.</span>
         </div>
       </div>
 
