@@ -28,6 +28,7 @@ export default function LoginScreen({ onLogin, theme, setTheme }) {
         <input id="login-password" type="password" className="form-control" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
       <button className="btn btn-primary" disabled={busy || !isSupabaseConfigured}>{busy ? 'Entrando…' : 'Acessar o sistema'} <ArrowRight size={16} /></button>
       <p style={{ color: 'var(--text-secondary)', fontSize: '.8rem' }}>Use a conta individual fornecida pelo gestor. Para recuperar o acesso, entre em contato com ele.</p>
+      <a className="btn btn-secondary demo-link" href="./demo.html">Explorar demonstração visual <ArrowRight size={16} /></a>
     </form>
   </div></div>;
 }

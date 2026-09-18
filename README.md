@@ -4,6 +4,12 @@ Sistema de gestão de rotinas contábeis para organizar tarefas, competências, 
 
 Construído com React 19, Vite 8 e Supabase (Auth, PostgreSQL e Storage).
 
+## Teste visual online
+
+[Abrir a versão de teste](https://controle-tarefas-allangomes-teste.andersongodinho2009.chatgpt.site) e selecionar **Explorar demonstração visual**. A hospedagem de teste no Sites é privada para a conta proprietária.
+
+A página `demo.html` usa dados fictícios e permite navegar pelas telas e simular alterações em memória, sem autenticação ou conexão ao Supabase. Recarregar a página descarta as alterações. Não use dados reais. Uploads e contas reais continuam dependendo da configuração do Supabase; a demonstração não altera as permissões do sistema.
+
 ## Interface
 
 ![Painel de controle com prioridades da equipe](docs/images/painel.png)

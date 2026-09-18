@@ -263,3 +263,9 @@ svg { flex-shrink: 0; }
   .tasks-toolbar > div { max-width: 100%; }
   .calendar-header { flex-wrap: wrap; gap: 14px; }
 }
+.demo-banner { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 16px; margin-bottom:24px; border:1px solid var(--border-color); border-radius:10px; background:var(--color-inprogress-bg); color:var(--text-primary); }
+.demo-banner strong { font-size:13px; font-weight:500; }
+.demo-banner p { color:var(--text-secondary); font-size:12px; margin-top:3px; }
+.demo-banner .btn { flex-shrink:0; }
+.demo-link { text-decoration:none; justify-content:center; }
+@media(max-width:620px) { .demo-banner { align-items:flex-start; flex-direction:column; } }

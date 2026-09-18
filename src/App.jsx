@@ -34,7 +34,12 @@ import Logo from './components/Logo';
 import ThemeToggle from './components/ThemeToggle';
 
 export default function App() {
-  const { tasks, logs, companies, team, taskCatalog, userSession, authUser, authReady, dbStatus, error, busy, canManage, handleLogin, handleLogout, fetchSupabaseData, dismissError, handleAddTask, handleUpdateTask, handleDeleteTask, handleClearAllTasks, handleRenewTask, handleAddCompany, handleUpdateCompany, handleDeleteCompany, handleTriggerAutomation, handleAddTaskToCatalog, handleUpdateCatalogTask, handleDeleteCatalogTask, handleAddTeamMember, handleUpdateTeamMember, handleDeleteTeamMember, handleAssignCompaniesToUser } = useWorkspace();
+  const workspace = useWorkspace();
+  return <WorkspaceApp workspace={workspace} />;
+}
+
+export function WorkspaceApp({ workspace, demoMode = false }) {
+  const { tasks, logs, companies, team, taskCatalog, userSession, authUser, authReady, dbStatus, error, busy, canManage, handleLogin, handleLogout, fetchSupabaseData, dismissError, handleAddTask, handleUpdateTask, handleDeleteTask, handleClearAllTasks, handleRenewTask, handleAddCompany, handleUpdateCompany, handleDeleteCompany, handleTriggerAutomation, handleAddTaskToCatalog, handleUpdateCatalogTask, handleDeleteCatalogTask, handleAddTeamMember, handleUpdateTeamMember, handleDeleteTeamMember, handleAssignCompaniesToUser } = workspace;
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('controle_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch { return 'light'; } });
   useEffect(() => { document.documentElement.setAttribute('data-theme', theme); try { localStorage.setItem('controle_theme', theme); } catch { /* Theme remains usable without storage. */ } }, [theme]);
   const [currentView, setCurrentView] = useState('dashboard');
@@ -95,14 +100,15 @@ export default function App() {
         <header className="topbar">
           <div className="breadcrumb"><span>Meu escritório</span><ChevronRight size={13} /><span>{getViewTitle()}</span></div>
           <div className="topbar-actions">
-            <button className={`connection-status ${dbStatus === 'connected' ? 'connected' : ''}`} onClick={() => setShowConfigModal(true)} aria-label="Status da conexão">
-              <span className="connection-dot" /><span>{dbStatus === 'connected' ? 'Conectado' : dbStatus === 'connecting' ? 'Conectando…' : 'Sem conexão'}</span>
+            <button className={`connection-status ${dbStatus === 'connected' ? 'connected' : ''}`} onClick={() => { if (!demoMode) setShowConfigModal(true); }} aria-label={demoMode ? "Modo demonstração" : "Status da conexão"}>
+              <span className="connection-dot" /><span>{demoMode ? 'Demonstração' : dbStatus === 'connected' ? 'Conectado' : dbStatus === 'connecting' ? 'Conectando…' : 'Sem conexão'}</span>
             </button>
             <ThemeToggle theme={theme} setTheme={setTheme} size="sm" />
           </div>
         </header>
         {/* Content Body */}
         <div className="content-body" id="workspace-content" tabIndex={-1}>
+          {demoMode && <div className="demo-banner" role="status"><div><strong>Demonstração visual</strong><p>Dados fictícios. As alterações são descartadas ao recarregar. Não use dados reais.</p></div><button className="btn btn-secondary" onClick={() => window.location.reload()}>Reiniciar demo</button></div>}
           <div className="workspace-heading"><div><h1>{getViewTitle()}</h1><p>{currentView === 'dashboard' ? new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + ' · Acompanhe o dia da sua equipe.' : 'Organize as rotinas e acompanhe as entregas do escritório.'}</p></div>
             {currentView === 'dashboard' && <button className="btn btn-primary" disabled={busy || dbStatus !== 'connected'} onClick={() => handleAddTaskFromCalendar(localDateString(new Date()))}><Plus size={16} /> Nova tarefa</button>}
           </div>

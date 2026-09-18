@@ -167,3 +167,32 @@ test('design aprovado: filtros, detalhes, gravação e navegação responsiva', 
     await page.screenshot({path:`test-results/mobile-${name.replace(/[^a-z]/gi,'')}.png`});
   }
 });
+
+test('demonstração isolada permite explorar sem autenticação e descarta alterações', async ({page}) => {
+  const requests=[];
+  page.on('request',request=>{if(request.url().includes('supabase.co')) requests.push(request.url());});
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/demo.html');
+  await expect(page.getByText('Demonstração visual',{exact:true})).toBeVisible();
+  const panel=page.getByRole('region',{name:'Prioridades da equipe'});
+  await panel.getByRole('button',{name:/Apuração do Simples Nacional/}).click();
+  const drawer=page.getByRole('dialog',{name:'Apuração do Simples Nacional'});
+  await drawer.getByRole('button',{name:'Concluir tarefa',exact:true}).click();
+  await expect(drawer.getByLabel('Status da tarefa')).toHaveValue('Concluído');
+  await page.keyboard.press('Escape');
+  await page.reload();
+  await panel.getByRole('button',{name:/Apuração do Simples Nacional/}).click();
+  await expect(drawer.getByLabel('Status da tarefa')).toHaveValue('Pendente');
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({width:390,height:844});
+  for(const name of ['Empresas & Clientes','Catálogo de rotinas','Atrelar às Empresas','Equipe','Histórico & Auditoria','Calendário','Tarefas & Recibos']) {
+    await page.getByRole('navigation').getByRole('button',{name,exact:true}).click();
+    expect(await page.locator('.content-body').evaluate(el=>el.scrollWidth<=el.clientWidth),name).toBe(true);
+  }
+  expect(errors).toEqual([]);
+  expect(requests).toEqual([]);
+  await page.getByRole('button',{name:'Sair do sistema'}).click();
+  await expect(page.getByRole('button',{name:'Acessar o sistema'})).toBeVisible();
+  await expect(page.getByRole('navigation')).toHaveCount(0);
+});
